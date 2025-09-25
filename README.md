@@ -195,10 +195,8 @@ This is a Python rewrite of the original Nim implementation. The binary parsing 
 4. Add tests for new functionality
 5. Submit a pull request
 
-## License
-
-This project is licensed under the MIT License.
-
 ## Support
 
 For issues and questions, please refer to the API documentation or check the main repository.
+
+# I do not own any of the core code, that is all https://github.com/niv and some unknowable group of contributors.
