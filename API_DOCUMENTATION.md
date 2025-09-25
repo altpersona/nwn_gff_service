@@ -178,8 +178,11 @@ Currently, there are no rate limits implemented. Future versions may include rat
 
 ### Running the Server
 ```bash
-nimble install -d
-nim c -r gff_api.nim
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Run the server
+python main.py
 ```
 
 ### Testing with Sample Files
