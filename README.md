@@ -1,6 +1,6 @@
-# NWN GFF API Service
+# NWN GFF API Service - Python FastAPI Implementation
 
-An HTTP API service for converting between NWN (Neverwinter Nights) GFF (Game File Format) and JSON formats, with support for SQLite database embedding and extraction.
+A Python FastAPI service for converting between NWN (Neverwinter Nights) GFF (Game File Format) and JSON formats, with support for SQLite database embedding and extraction.
 
 ## Features
 
@@ -11,49 +11,53 @@ An HTTP API service for converting between NWN (Neverwinter Nights) GFF (Game Fi
 - **File Upload/Download**: Support for file uploads and downloads
 - **Error Handling**: Comprehensive error responses with proper HTTP status codes
 - **CORS Support**: Cross-origin resource sharing enabled
+- **Docker Support**: Containerized deployment ready
+
+## Requirements
+
+- Python 3.8+
+- No external runtime dependencies (all included in requirements.txt)
 
 ## Quick Start
 
-### Prerequisites
-
-- Nim >= 1.6.0 (the programming language, not the R package)
-- Nimble package manager (Nim's package manager)
-
 ### Installation
 
-**Important Note**: This project uses the **Nim programming language** (https://nim-lang.org), not the R package called "nimble". These are completely different technologies.
-
-1. Install Nim and Nimble:
+1. Clone the repository:
    ```bash
-   # On Ubuntu/Debian:
-   sudo apt install nim
-   
-   # On macOS:
-   brew install nim
-   
-   # Or download from https://nim-lang.org/install.html
+   git clone https://github.com/altpersona/nwn_gff_service.git
+   cd nwn_gff_service
    ```
 
-2. Clone or download the project files
+2. Create a virtual environment (recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
 3. Install dependencies:
    ```bash
-   nimble install -d
+   pip install -r requirements.txt
    ```
-4. Build and run the API server:
+
+4. Run the API server:
    ```bash
-   nim c -r gff_api.nim
+   python main.py
    ```
 
-The server will start on port 8080. You can access the API at `http://localhost:8080/api/v1`.
+The server will start on port 8000. You can access the API at `http://localhost:8000`.
 
-### Testing the API
+### Testing with Docker
 
-Run the test suite to verify everything is working:
-```bash
-nim c -r test_api.nim
-```
+1. Build and run with Docker:
+   ```bash
+   docker-compose up --build
+   ```
 
-**Note**: This project requires the Nim programming language runtime to be installed on your system.
+2. Or build manually:
+   ```bash
+   docker build -t nwn-gff-api .
+   docker run -p 8000:8000 nwn-gff-api
+   ```
 
 ## API Endpoints
 
@@ -67,49 +71,70 @@ nim c -r test_api.nim
 - `POST /api/v1/convert/sqlite-extract` - Extract SQLite from GFF file
 
 ### Base Endpoint
-- `GET /` - API information and available endpoints
+- `GET /api/v1/` - API information and available endpoints
 
 ## Usage Examples
 
 ### Convert GFF to JSON
 ```bash
-curl -X POST -F "file=@example.gff" http://localhost:8080/api/v1/convert/gff-to-json
+curl -X POST -F "file=@example.gff" http://localhost:8000/api/v1/convert/gff-to-json
 ```
 
 ### Convert JSON to GFF
 ```bash
-curl -X POST -F "file=@example.json" http://localhost:8080/api/v1/convert/json-to-gff -o converted.gff
+curl -X POST -F "file=@example.json" http://localhost:8000/api/v1/convert/json-to-gff -o converted.gff
 ```
 
 ### Check API Health
 ```bash
-curl http://localhost:8080/api/v1/health
+curl http://localhost:8000/api/v1/health
+```
+
+## Testing
+
+Run the test suite:
+```bash
+pytest tests/
+```
+
+Run with coverage:
+```bash
+pytest tests/ --cov=app --cov-report=html
 ```
 
 ## File Structure
 
 ```
 .
-├── gff_api.nim          # Main API server
-├── shared.nim           # GFF functionality module
-├── nwn_gff_api.nimble  # Project configuration
-├── test_api.nim         # Test suite
-├── API_DOCUMENTATION.md # Detailed API documentation
-├── VERSION_HISTORY.md   # Version history and changelog
-├── NOTES.md            # Development notes
-└── README.md           # This file
+├── app/
+│   ├── __init__.py
+│   ├── main.py                 # FastAPI application
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── gff_models.py      # GFF data structures
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── gff_parser.py      # GFF binary parsing
+│   │   ├── gff_converter.py   # GFF/JSON conversion
+│   │   └── sqlite_handler.py  # SQLite handling
+│   └── api/
+│       ├── __init__.py
+│       └── endpoints.py       # API endpoints
+├── tests/
+│   ├── __init__.py
+│   └── test_api.py           # API tests
+├── Dockerfile
+├── docker-compose.yml
+├── main.py                   # Entry point
+├── requirements.txt          # Python dependencies
 ```
 
 ## Configuration
 
-The API server runs on port 8080 by default. You can modify this in the [`gff_api.nim`](gff_api.nim:190) file:
+The API server runs on port 8000 by default. You can modify this by setting the `PORT` environment variable:
 
-```nim
-let settings = newSettings(
-  port = 8080,
-  debug = true,
-  appName = "NWN GFF API"
-)
+```bash
+PORT=8080 python main.py
 ```
 
 ## Supported File Formats
@@ -125,28 +150,15 @@ let settings = newSettings(
 ## Development
 
 ### Development Mode
-Run the server in development mode with hot reload:
+Run the server in development mode with auto-reload:
 ```bash
-nim c -r --hotReload:on gff_api.nim
+python main.py
 ```
 
 ### Building for Production
 ```bash
-nim c -d:release gff_api.nim
+docker build -t nwn-gff-api .
 ```
-
-### Running Tests
-```bash
-nim c -r test_api.nim
-```
-
-## Architecture
-
-The API is built using:
-- **Prologue**: Modern Nim web framework
-- **Shared Module**: Contains GFF parsing and conversion logic
-- **Async/Await**: Non-blocking request handling
-- **Multipart Forms**: File upload support
 
 ## Error Handling
 
@@ -154,8 +166,7 @@ All endpoints return consistent error responses:
 
 ```json
 {
-  "error": "Descriptive error message",
-  "status": 400
+  "detail": "Descriptive error message"
 }
 ```
 
@@ -164,18 +175,17 @@ Common status codes:
 - `400 Bad Request` - Invalid request or file format
 - `413 Payload Too Large` - File exceeds size limit
 - `500 Internal Server Error` - Server-side error
-- `501 Not Implemented` - Feature not yet implemented
 
 ## Known Limitations
 
-- SQLite embedding/extraction is stubbed and returns "Not Implemented"
-- GFF parsing uses simplified stub implementations
-- No authentication or rate limiting
+- GFF binary parsing uses simplified stub implementation
+- Full binary format implementation would require complete reverse engineering
+- SQLite functionality uses zlib compression instead of Zstd
 - Basic error handling only
 
-## Future Enhancements
+## Development Notes
 
-See [VERSION_HISTORY.md](VERSION_HISTORY.md) for planned features and version roadmap.
+This is a Python rewrite of the original Nim implementation. The binary parsing logic is simplified but maintains the same API interface. For production use, the full GFF binary format specification would need to be implemented.
 
 ## Contributing
 
@@ -191,4 +201,4 @@ This project is licensed under the MIT License.
 
 ## Support
 
-For issues and questions, please refer to the API documentation or check the development notes in [NOTES.md](NOTES.md).
+For issues and questions, please refer to the API documentation or check the main repository.

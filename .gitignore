@@ -1,10 +1,27 @@
-# Nim build artifacts
-nimcache/
-*.exe
-*.dll
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 *.so
-*.dylib
-gff_api
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Test files
 test.gff
@@ -30,16 +47,10 @@ Thumbs.db
 *.tmp
 *.temp
 
-# Package manager
-nimble.lock
-
-# Backup files
-*.bak
-*.backup
-
 # Coverage reports
 *.coverage
 coverage/
+htmlcov/
 
 # Documentation build
 docs/build/
@@ -52,3 +63,42 @@ site/
 # Binary files (if any)
 bin/
 build/
+
+# pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
