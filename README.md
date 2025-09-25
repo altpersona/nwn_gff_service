@@ -1,4 +1,4 @@
-# NWN GFF API Service
+# NWN GFF API Service   
 
 An HTTP API service for converting between NWN (Neverwinter Nights) GFF (Game File Format) and JSON formats, with support for SQLite database embedding and extraction.
 
@@ -185,10 +185,8 @@ See [VERSION_HISTORY.md](VERSION_HISTORY.md) for planned features and version ro
 4. Add tests for new functionality
 5. Submit a pull request
 
-## License
-
-This project is licensed under the MIT License.
-
 ## Support
 
 For issues and questions, please refer to the API documentation or check the development notes in [NOTES.md](NOTES.md).
+
+# I do not own any of the core code, that is all https://github.com/niv and some unknowable group of contributors. 
