@@ -198,6 +198,41 @@ Create a sample JSON file for testing:
 }
 ```
 
+### Web Interface Integration
+The service includes a complete web interface (`web_interface.html`) that demonstrates API integration:
+
+**Features:**
+- Drag-and-drop file selection
+- Real-time conversion status
+- Automatic file downloads
+- API health monitoring
+- Responsive design
+
+**Usage:**
+```bash
+# Start the API server
+python main.py
+
+# Open web interface in browser
+open web_interface.html  # macOS
+xdg-open web_interface.html  # Linux
+start web_interface.html  # Windows
+```
+
+**Testing web integration:**
+```bash
+python3 test_web_integration.py
+```
+
+### CORS Configuration
+The API is pre-configured with CORS enabled for all origins, allowing web interface integration from:
+- Local files (`file://`)
+- Local development servers (`http://localhost:3000`)
+- Any domain (`https://yourdomain.com`)
+- Any origin for maximum compatibility
+
+This allows the web interface to work seamlessly without CORS issues.
+
 ## Known Limitations
 - SQLite embedding/extraction is not yet fully implemented (returns 501 Not Implemented)
 - GFF reading/writing uses stub implementations for demonstration

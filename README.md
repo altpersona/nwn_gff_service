@@ -102,6 +102,11 @@ Run with coverage:
 pytest tests/ --cov=app --cov-report=html
 ```
 
+Test web interface integration:
+```bash
+python3 test_web_integration.py
+```
+
 ## File Structure
 
 ```
@@ -127,6 +132,9 @@ pytest tests/ --cov=app --cov-report=html
 ├── docker-compose.yml
 ├── main.py                   # Entry point
 ├── requirements.txt          # Python dependencies
+├── web_interface.html        # HTML/JavaScript web interface
+├── WEB_INTERFACE_GUIDE.md    # Web interface integration guide
+├── test_web_integration.py   # Web interface testing script
 ```
 
 ## Configuration
@@ -158,6 +166,78 @@ python main.py
 ### Building for Production
 ```bash
 docker build -t nwn-gff-api .
+```
+
+## Web Interface Integration
+
+This service includes a complete HTML/JavaScript web interface (`web_interface.html`) that demonstrates how a webpage can interact with the API for file conversions.
+
+### Features:
+- **Drag-and-drop file selection**
+- **Real-time conversion status**
+- **Automatic file downloads**
+- **API health monitoring**
+- **Responsive design**
+
+### Using the Web Interface:
+
+1. **Open the web interface**:
+   ```bash
+   # The API service must be running
+   python main.py
+   
+   # Open in browser
+   # On macOS:
+   open web_interface.html
+   
+   # On Linux:
+   xdg-open web_interface.html
+   
+   # On Windows:
+   start web_interface.html
+   ```
+
+2. **Use the interface**:
+   - Select a file using the file picker or drag-and-drop
+   - Click conversion buttons (GFF→JSON or JSON→GFF)
+   - Download converted files automatically
+
+### Web Interface Documentation:
+- **Complete guide**: See `WEB_INTERFACE_GUIDE.md` for detailed integration instructions
+- **JavaScript examples**: Full code examples for button handlers, error handling, and API interaction
+- **CORS configuration**: Pre-configured to work with any origin for easy integration
+
+### Example JavaScript Integration:
+```javascript
+// Convert JSON to GFF
+async function convertJsonToGff() {
+    const fileInput = document.getElementById('jsonFile');
+    const file = fileInput.files[0];
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch('http://localhost:8000/api/v1/convert/json-to-gff', {
+        method: 'POST',
+        body: formData
+    });
+    
+    if (response.ok) {
+        const blob = await response.blob();
+        // Create download link and trigger download
+        const downloadUrl = URL.createObjectURL(blob);
+        const downloadLink = document.createElement('a');
+        downloadLink.href = downloadUrl;
+        downloadLink.download = file.name.replace('.json', '.gff');
+        downloadLink.click();
+    }
+}
+```
+
+### Testing the Web Interface:
+```bash
+# Run the web interface test
+python3 test_web_integration.py
 ```
 
 ## Error Handling
