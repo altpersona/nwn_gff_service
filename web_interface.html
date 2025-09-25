@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NWN GFF Converter - Web Interface</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .file-input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="file"]:hover {
+            border-color: #3498db;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .convert-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .convert-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
+        
+        .convert-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .secondary-btn {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .secondary-btn:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .status-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            min-height: 50px;
+            display: none;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .status-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .download-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #27ae60;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .download-link:hover {
+            background-color: #229954;
+        }
+        
+        .api-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .api-status.connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .api-status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .file-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .format-info {
+            background-color: #e8f4f8;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .format-info h4 {
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .format-info ul {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NWN GFF Converter</h1>
+        <p class="subtitle">Convert between NWN GFF and JSON formats</p>
+        
+        <div class="api-status" id="apiStatus"></div>
+        
+        <!-- GFF to JSON Conversion -->
+        <div class="section">
+            <h2>Convert GFF to JSON</h2>
+            <div class="format-info">
+                <h4>Supported GFF formats:</h4>
+                <ul>
+                    <li>.gff, .bic, .utc, .utd, .ute, .uti, .utm, .utp, .uts, .utt, .utw</li>
+                </ul>
+            </div>
+            <div class="file-input-group">
+                <label for="gffFile">Select GFF file:</label>
+                <input type="file" id="gffFile" accept=".gff,.bic,.utc,.utd,.ute,.uti,.utm,.utp,.uts,.utt,.utw">
+                <div class="file-info" id="gffFileInfo"></div>
+            </div>
+            <div class="button-group">
+                <button id="convertGffToJson" class="convert-btn" onclick="convertGffToJson()">
+                    Convert to JSON
+                </button>
+                <button class="secondary-btn" onclick="document.getElementById('gffFile').value = ''">
+                    Clear
+                </button>
+            </div>
+            <div id="gffStatus" class="status-area"></div>
+        </div>
+        
+        <!-- JSON to GFF Conversion -->
+        <div class="section">
+            <h2>Convert JSON to GFF</h2>
+            <div class="format-info">
+                <h4>JSON format:</h4>
+                <ul>
+                    <li>Standard JSON files (.json)</li>
+                    <li>Compatible with NWN GFF structure</li>
+                </ul>
+            </div>
+            <div class="file-input-group">
+                <label for="jsonFile">Select JSON file:</label>
+                <input type="file" id="jsonFile" accept=".json">
+                <div class="file-info" id="jsonFileInfo"></div>
+            </div>
+            <div class="button-group">
+                <button id="convertJsonToGff" class="convert-btn" onclick="convertJsonToGff()">
+                    Convert to GFF
+                </button>
+                <button class="secondary-btn" onclick="document.getElementById('jsonFile').value = ''">
+                    Clear
+                </button>
+            </div>
+            <div id="jsonStatus" class="status-area"></div>
+        </div>
+        
+        <!-- API Health Check -->
+        <div class="section">
+            <h2>API Status</h2>
+            <div class="button-group">
+                <button class="secondary-btn" onclick="checkApiHealth()">
+                    Check API Health
+                </button>
+            </div>
+            <div id="healthStatus" class="status-area"></div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:8000/api/v1';
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            checkApiHealth();
+            setupFileListeners();
+        });
+        
+        // Setup file input listeners
+        function setupFileListeners() {
+            const gffFileInput = document.getElementById('gffFile');
+            const jsonFileInput = document.getElementById('jsonFile');
+            
+            gffFileInput.addEventListener('change', function() {
+                updateFileInfo(this, 'gffFileInfo');
+            });
+            
+            jsonFileInput.addEventListener('change', function() {
+                updateFileInfo(this, 'jsonFileInfo');
+            });
+        }
+        
+        // Update file info display
+        function updateFileInfo(input, infoElementId) {
+            const file = input.files[0];
+            const infoElement = document.getElementById(infoElementId);
+            
+            if (file) {
+                const fileSize = (file.size / 1024).toFixed(2);
+                infoElement.textContent = `Selected: ${file.name} (${fileSize} KB)`;
+            } else {
+                infoElement.textContent = '';
+            }
+        }
+        
+        // Check API health status
+        async function checkApiHealth() {
+            const statusElement = document.getElementById('healthStatus');
+            const apiStatusElement = document.getElementById('apiStatus');
+            
+            try {
+                statusElement.style.display = 'block';
+                statusElement.className = 'status-area status-info';
+                statusElement.innerHTML = '<div class="loading"></div>Checking API health...';
+                
+                const response = await fetch(`${API_BASE_URL}/health`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    statusElement.className = 'status-area status-success';
+                    statusElement.innerHTML = `
+                        <strong>API Status:</strong> ${data.status}<br>
+                        <strong>Service:</strong> ${data.service}<br>
+                        <strong>Version:</strong> ${data.version}
+                    `;
+                    showApiStatus('API Connected', 'connected');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                statusElement.className = 'status-area status-error';
+                statusElement.innerHTML = `
+                    <strong>API Connection Failed</strong><br>
+                    Error: ${error.message}<br>
+                    <small>Make sure the API service is running on http://localhost:8000</small>
+                `;
+                showApiStatus('API Disconnected', 'disconnected');
+            }
+        }
+        
+        // Show API status indicator
+        function showApiStatus(message, status) {
+            const apiStatusElement = document.getElementById('apiStatus');
+            apiStatusElement.textContent = message;
+            apiStatusElement.className = `api-status ${status}`;
+            apiStatusElement.style.display = 'block';
+        }
+        
+        // Convert GFF to JSON
+        async function convertGffToJson() {
+            const fileInput = document.getElementById('gffFile');
+            const statusElement = document.getElementById('gffStatus');
+            const button = document.getElementById('convertGffToJson');
+            
+            if (!fileInput.files[0]) {
+                showStatus(statusElement, 'error', 'Please select a GFF file to convert.');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            
+            if (file.size > maxSize) {
+                showStatus(statusElement, 'error', 'File is too large. Maximum size is 10MB.');
+                return;
+            }
+            
+            button.disabled = true;
+            statusElement.style.display = 'block';
+            statusElement.className = 'status-area status-info';
+            statusElement.innerHTML = '<div class="loading"></div>Converting GFF to JSON...';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/convert/gff-to-json`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const jsonData = await response.json();
+                    showStatus(statusElement, 'success', 'Conversion successful! JSON data ready for download.');
+                    
+                    // Create download link for JSON
+                    const jsonBlob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+                    const downloadUrl = URL.createObjectURL(jsonBlob);
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = downloadUrl;
+                    downloadLink.download = file.name.replace(/\.[^/.]+$/, '') + '.json';
+                    downloadLink.textContent = 'Download JSON File';
+                    downloadLink.className = 'download-link';
+                    
+                    statusElement.appendChild(document.createElement('br'));
+                    statusElement.appendChild(downloadLink);
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `Conversion failed: ${response.statusText}`);
+                }
+            } catch (error) {
+                showStatus(statusElement, 'error', `Conversion failed: ${error.message}`);
+            } finally {
+                button.disabled = false;
+            }
+        }
+        
+        // Convert JSON to GFF
+        async function convertJsonToGff() {
+            const fileInput = document.getElementById('jsonFile');
+            const statusElement = document.getElementById('jsonStatus');
+            const button = document.getElementById('convertJsonToGff');
+            
+            if (!fileInput.files[0]) {
+                showStatus(statusElement, 'error', 'Please select a JSON file to convert.');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            
+            if (file.size > maxSize) {
+                showStatus(statusElement, 'error', 'File is too large. Maximum size is 10MB.');
+                return;
+            }
+            
+            button.disabled = true;
+            statusElement.style.display = 'block';
+            statusElement.className = 'status-area status-info';
+            statusElement.innerHTML = '<div class="loading"></div>Converting JSON to GFF...';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/convert/json-to-gff`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = URL.createObjectURL(blob);
+                    
+                    showStatus(statusElement, 'success', 'Conversion successful! GFF file ready for download.');
+                    
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = downloadUrl;
+                    downloadLink.download = file.name.replace('.json', '.gff');
+                    downloadLink.textContent = 'Download GFF File';
+                    downloadLink.className = 'download-link';
+                    
+                    statusElement.appendChild(document.createElement('br'));
+                    statusElement.appendChild(downloadLink);
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `Conversion failed: ${response.statusText}`);
+                }
+            } catch (error) {
+                showStatus(statusElement, 'error', `Conversion failed: ${error.message}`);
+            } finally {
+                button.disabled = false;
+            }
+        }
+        
+        // Helper function to show status messages
+        function showStatus(element, type, message) {
+            element.style.display = 'block';
+            element.className = `status-area status-${type}`;
+            element.innerHTML = message;
+        }
+    </script>
+</body>
+</html>
