@@ -1,0 +1,54 @@
+# Nim build artifacts
+nimcache/
+*.exe
+*.dll
+*.so
+*.dylib
+gff_api
+
+# Test files
+test.gff
+test.json
+converted.gff
+extracted.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Package manager
+nimble.lock
+
+# Backup files
+*.bak
+*.backup
+
+# Coverage reports
+*.coverage
+coverage/
+
+# Documentation build
+docs/build/
+site/
+
+# Environment files
+.env
+.env.local
+
+# Binary files (if any)
+bin/
+build/
